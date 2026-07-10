@@ -245,39 +245,28 @@ function getDialogHTML() {
       }
 
       #page-inspector-dialog .di-status {
-        display: flex; align-items: center; gap: 8px; padding: 8px 16px;
-        background: #0d0d0d; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 16px; background: #161616; border-bottom: 1px solid rgba(255,176,0,0.08); flex-shrink: 0;
       }
+      #page-inspector-dialog .di-status-left { display: flex; align-items: center; gap: 8px; }
       #page-inspector-dialog .di-status-dot {
-        width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
-        box-shadow: 0 0 6px #4ade80; animation: pulse 2s ease-in-out infinite;
+        width: 7px; height: 7px; border-radius: 50%; background: #4ade80;
+        box-shadow: 0 0 8px #4ade80; animation: pulse 2s ease-in-out infinite;
       }
-      #page-inspector-dialog .di-status-dot.loading { background: #ffb000; box-shadow: 0 0 6px #ffb000; animation: pulse 0.8s ease-in-out infinite; }
-      #page-inspector-dialog .di-status-dot.error { background: #f87171; box-shadow: 0 0 6px #f87171; animation: none; }
-      #page-inspector-dialog .di-status-text { font-size: 11px; color: #555; font-family: 'JetBrains Mono', monospace; }
-
-      #page-inspector-dialog .di-actions {
-        padding: 12px; display: none; flex-shrink: 0;
+      #page-inspector-dialog .di-status-dot.loading { background: #ffb000; box-shadow: 0 0 8px #ffb000; animation: pulse 0.8s ease-in-out infinite; }
+      #page-inspector-dialog .di-status-dot.error { background: #f87171; box-shadow: 0 0 8px #f87171; animation: none; }
+      #page-inspector-dialog .di-status-text { font-size: 11px; color: #666; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px; }
+      #page-inspector-dialog .di-header-actions { display: flex; gap: 4px; }
+      #page-inspector-dialog .di-quick-btn {
+        display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: #1e1e1e;
+        border: 1px solid #2a2a2a; border-radius: 6px; color: #888; font-size: 11px;
+        font-family: 'JetBrains Mono', monospace; cursor: pointer; transition: all 0.15s ease;
       }
-      #page-inspector-dialog .di-action-btn {
-        flex: 1; display: flex; align-items: center; gap: 10px; padding: 12px 14px;
-        background: #1a1a1a; border: 1px solid #252525; border-radius: 10px;
-        cursor: pointer; transition: all 0.2s ease; color: #e8e8e8;
-      }
-      #page-inspector-dialog .di-action-btn:hover {
-        background: #2a2a2a; border-color: rgba(255,176,0,0.3); transform: translateY(-1px);
-      }
-      #page-inspector-dialog .di-action-btn.primary {
-        background: linear-gradient(135deg, rgba(255,176,0,0.12) 0%, rgba(255,176,0,0.06) 100%);
-        border-color: rgba(255,176,0,0.3); color: #ffb000;
-      }
-      #page-inspector-dialog .di-action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-      #page-inspector-dialog .di-action-btn .di-btn-icon {
-        width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      }
-      #page-inspector-dialog .di-btn-text { flex: 1; }
-      #page-inspector-dialog .di-btn-title { font-size: 13px; font-weight: 500; }
-      #page-inspector-dialog .di-btn-desc { font-size: 10px; color: #888; margin-top: 1px; }
+      #page-inspector-dialog .di-quick-btn:hover { background: #252525; border-color: #333; color: #e8e8e8; }
+      #page-inspector-dialog .di-quick-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      #page-inspector-dialog .di-quick-btn:disabled:hover { background: #1e1e1e; border-color: #2a2a2a; color: #888; }
+      #page-inspector-dialog .di-quick-btn.primary { background: rgba(255,176,0,0.1); border-color: rgba(255,176,0,0.3); color: #ffb000; }
+      #page-inspector-dialog .di-quick-btn.primary:hover { background: rgba(255,176,0,0.15); border-color: rgba(255,176,0,0.5); }
 
       #page-inspector-dialog .di-result-area {
         flex: 1; margin: 0 12px 12px; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
@@ -304,7 +293,7 @@ function getDialogHTML() {
       }
       #page-inspector-dialog .di-tab-content.active { display: flex; flex-direction: column; }
       #page-inspector-dialog .di-content-body {
-        flex: 1; padding: 14px; max-height: 220px; overflow-y: auto; font-size: 12px; line-height: 1.7; color: #888;
+        flex: 1; padding: 14px; max-height: 280px; overflow-y: auto; font-size: 12px; line-height: 1.7; color: #888;
       }
       #page-inspector-dialog .di-content-body::-webkit-scrollbar { width: 6px; }
       #page-inspector-dialog .di-content-body::-webkit-scrollbar-track { background: transparent; }
@@ -406,7 +395,7 @@ function getDialogHTML() {
 
     <header class="di-header">
       <div class="di-logo" title="PageBrief - AI 网页总结工具">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
           <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/>
           <path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -415,18 +404,6 @@ function getDialogHTML() {
         <span>PageBrief</span>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <button class="di-header-btn" id="diExtractBtn" title="提取正文">
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/>
-            <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button class="di-header-btn" id="diSummarizeBtn" title="总结内容" disabled>
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <path d="M10 3l1.5 4.5H16l-3.5 2.5 1.5 4.5L10 12l-4 2.5 1.5-4.5L4 7.5h4.5L10 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div style="width:1px;height:20px;background:#333;margin:0 2px;"></div>
         <button class="di-settings-toggle" id="diSettingsToggle" title="设置">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M13.5 6.5L12 5l-1.5 1.5L12 8l1.5-1.5zM13.5 9.5L12 8l-1.5 1.5L12 11l1.5-1.5zM9.5 6.5L8 5 6.5 6.5 8 8l1.5-1.5zM2.5 6.5L5 4l1 1-2.5 2.5-1-1zM5 12l-2.5-2.5 1-1L6 11l-1 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
@@ -469,35 +446,25 @@ function getDialogHTML() {
     </section>
 
     <div class="di-status">
-      <span class="di-status-dot" id="diStatusDot"></span>
-      <span class="di-status-text" id="diStatusText">就绪</span>
-    </div>
-
-    <div class="di-actions">
-      <button class="di-action-btn primary" id="diExtractBtnOld">
-        <div class="di-btn-icon">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+      <div class="di-status-left">
+        <span class="di-status-dot" id="diStatusDot"></span>
+        <span class="di-status-text" id="diStatusText">就绪</span>
+      </div>
+      <div class="di-header-actions">
+        <button class="di-quick-btn" id="diExtractBtn" title="提取正文">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
             <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/>
             <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
           </svg>
-        </div>
-        <div class="di-btn-text">
-          <div class="di-btn-title">提取正文</div>
-          <div class="di-btn-desc">获取网页纯文本</div>
-        </div>
-      </button>
-      <button class="di-action-btn" id="diSummarizeBtnOld" disabled>
-        <div class="di-btn-icon">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <path d="M10 2L3 7v11h14V7l-7-5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-            <path d="M7 17v-6h6v6M7 11h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          提取
+        </button>
+        <button class="di-quick-btn primary" id="diSummarizeBtn" disabled title="AI 总结">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3l1.5 4.5H16l-3.5 2.5 1.5 4.5L10 12l-4 2.5 1.5-4.5L4 7.5h4.5L10 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
           </svg>
-        </div>
-        <div class="di-btn-text">
-          <div class="di-btn-title">总结内容</div>
-          <div class="di-btn-desc">AI 总结并导出 Markdown</div>
-        </div>
-      </button>
+          总结
+        </button>
+      </div>
     </div>
 
     <div class="di-result-area">
@@ -581,14 +548,13 @@ function initDialogEvents() {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.di-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.di-tab-content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.di-result-area').forEach(c => c.style.display = 'none');
-      document.getElementById('diQAContainer').style.display = 'none';
       tab.classList.add('active');
+
       if (tab.dataset.tab === 'qa') {
         document.getElementById('diQAContainer').style.display = 'flex';
       } else {
+        document.getElementById('diQAContainer').style.display = 'none';
         document.getElementById('di' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1) + 'Content').classList.add('active');
-        document.querySelector('.di-result-area').style.display = '';
       }
     });
   });
@@ -597,8 +563,10 @@ function initDialogEvents() {
   document.getElementById('diSettingsToggle').addEventListener('click', () => {
     const settings = document.getElementById('diSettings');
     const resultArea = document.querySelector('.di-result-area');
+    const qaContainer = document.getElementById('diQAContainer');
     settings.classList.toggle('open');
     if (resultArea) resultArea.style.display = settings.classList.contains('open') ? 'none' : '';
+    if (qaContainer) qaContainer.style.display = settings.classList.contains('open') ? 'none' : '';
   });
 
   // Load settings
@@ -621,7 +589,9 @@ function initDialogEvents() {
     }, () => {
       document.getElementById('diSettings').classList.remove('open');
       const resultArea = document.querySelector('.di-result-area');
+      const qaContainer = document.getElementById('diQAContainer');
       if (resultArea) resultArea.style.display = '';
+      if (qaContainer) qaContainer.style.display = '';
       setStatus('配置已保存', 'ready');
       setTimeout(() => setStatus('就绪'), 1500);
     });
@@ -629,42 +599,66 @@ function initDialogEvents() {
 
   // Extract button
   document.getElementById('diExtractBtn').addEventListener('click', async () => {
-    try {
-      showLoading(true, '正在提取内容...');
-      setStatus('正在提取...', 'loading');
+    const extractBtn = document.getElementById('diExtractBtn');
+    const originalBody = document.getElementById('diOriginalBody');
 
+    // Show inline loading
+    originalBody.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:#666;">
+        <div style="display:flex;gap:6px;">
+          <div style="width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 1s ease-in-out infinite;"></div>
+          <div style="width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 1s ease-in-out infinite;animation-delay:0.2s;"></div>
+          <div style="width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 1s ease-in-out infinite;animation-delay:0.4s;"></div>
+        </div>
+        <span style="font-size:12px;font-family:'JetBrains Mono',monospace;">正在提取网页内容...</span>
+      </div>
+    `;
+    extractBtn.disabled = true;
+    setStatus('正在提取...', 'loading');
+
+    try {
       pageData = extractPageContent();
       originalContent = pageData.content;
 
-      document.getElementById('diOriginalBody').innerHTML = `<pre>${escapeHtml(originalContent.slice(0, 5000))}${originalContent.length > 5000 ? '\n\n... (内容已截断)' : ''}</pre>`;
+      originalBody.innerHTML = `<pre>${escapeHtml(originalContent.slice(0, 5000))}${originalContent.length > 5000 ? '\n\n... (内容已截断)' : ''}</pre>`;
       document.querySelector('[data-tab="original"]').classList.add('has-content');
       document.getElementById('diOriginalActionBar').style.display = 'flex';
-
       document.getElementById('diSummarizeBtn').disabled = false;
       setStatus('提取完成', 'ready');
-
-      // Switch to original tab
-      document.querySelector('[data-tab="original"]').click();
     } catch (error) {
-      document.getElementById('diOriginalBody').innerHTML = `<span style="color: #f87171;">错误: ${error.message}</span>`;
+      originalBody.innerHTML = `<span style="color: #f87171;">错误: ${error.message}</span>`;
       setStatus('提取失败', 'error');
     } finally {
-      showLoading(false);
+      extractBtn.disabled = false;
     }
   });
 
   // Summarize button
   document.getElementById('diSummarizeBtn').addEventListener('click', async () => {
     if (!originalContent) return;
-    try {
-      showLoading(true, '正在 AI 总结...');
-      setStatus('正在总结...', 'loading');
 
+    const summaryBody = document.getElementById('diSummaryBody');
+    const summarizeBtn = document.getElementById('diSummarizeBtn');
+
+    // Show inline loading in content area
+    summaryBody.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:#666;">
+        <div style="display:flex;gap:6px;">
+          <div style="width:8px;height:8px;background:#ffb000;border-radius:50%;animation:pulse 1s ease-in-out infinite;"></div>
+          <div style="width:8px;height:8px;background:#ffb000;border-radius:50%;animation:pulse 1s ease-in-out infinite;animation-delay:0.2s;"></div>
+          <div style="width:8px;height:8px;background:#ffb000;border-radius:50%;animation:pulse 1s ease-in-out infinite;animation-delay:0.4s;"></div>
+        </div>
+        <span style="font-size:12px;font-family:'JetBrains Mono',monospace;">AI 总结中...</span>
+      </div>
+    `;
+    summarizeBtn.disabled = true;
+    setStatus('正在总结...', 'loading');
+
+    try {
       summaryContent = await summarizeContent(originalContent);
-      // Remove think blocks
       summaryContent = summaryContent.replace(/<think>[\s\S]*?<\/think>\s*/gi, '').trim();
 
-      document.getElementById('diSummaryBody').innerHTML = `<pre>${escapeHtml(summaryContent)}</pre>`;
+      summaryBody.innerHTML = `<pre>${escapeHtml(summaryContent)}</pre>`;
       document.querySelector('[data-tab="summary"]').classList.add('has-content');
       document.getElementById('diActionBar').style.display = 'flex';
       document.getElementById('diExportBtn').disabled = false;
@@ -672,10 +666,10 @@ function initDialogEvents() {
       setStatus('总结完成', 'ready');
       document.querySelector('[data-tab="summary"]').click();
     } catch (error) {
-      document.getElementById('diSummaryBody').innerHTML = `<span style="color: #f87171;">错误: ${error.message}</span>`;
+      summaryBody.innerHTML = `<span style="color: #f87171;">错误: ${error.message}</span>`;
       setStatus('总结失败', 'error');
     } finally {
-      showLoading(false);
+      summarizeBtn.disabled = false;
     }
   });
 
