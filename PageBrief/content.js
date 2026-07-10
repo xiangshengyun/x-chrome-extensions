@@ -126,6 +126,10 @@ function openDialog(floatingBtn) {
     animation: dialogIn 0.25s ease;
   `;
 
+  // 阻止对话框内的滚动传播到页面
+  dialog.addEventListener('wheel', e => e.stopPropagation(), { passive: false });
+  dialog.addEventListener('touchmove', e => e.stopPropagation(), { passive: false });
+
   dialog.innerHTML = getDialogHTML();
   document.body.appendChild(dialog);
   dialogInstance = dialog;
@@ -291,6 +295,9 @@ function getDialogHTML() {
         content: ''; display: inline-block; width: 6px; height: 6px; background: #4ade80;
         border-radius: 50%; margin-left: 6px; vertical-align: middle;
       }
+      #page-inspector-dialog .di-tab.has-qa::after {
+        background: #60a5fa;
+      }
       #page-inspector-dialog .di-tab-content {
         flex: 1; background: #1a1a1a; border: 1px solid #252525; border-top: none;
         border-radius: 0 0 10px 10px; overflow: hidden; display: none;
@@ -321,6 +328,68 @@ function getDialogHTML() {
       }
       #page-inspector-dialog .di-action-bar .di-export-btn:hover { background: #ffc233; }
       #page-inspector-dialog .di-action-bar .di-export-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+      #page-inspector-dialog .di-qa-container {
+        flex: 1; margin: 0 12px 12px; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+      }
+      #page-inspector-dialog .di-qa-tabs {
+        display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;
+      }
+      #page-inspector-dialog .di-qa-messages {
+        flex: 1; min-height: 0; background: #1a1a1a; border: 1px solid #252525; border-top: none;
+        border-radius: 0 0 10px 10px; overflow-y: auto; padding: 12px;
+      }
+      #page-inspector-dialog .di-qa-messages::-webkit-scrollbar { width: 6px; }
+      #page-inspector-dialog .di-qa-messages::-webkit-scrollbar-track { background: transparent; }
+      #page-inspector-dialog .di-qa-messages::-webkit-scrollbar-thumb { background: #252525; border-radius: 3px; }
+      #page-inspector-dialog .di-qa-empty {
+        height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: #555; font-size: 12px; gap: 8px;
+      }
+      #page-inspector-dialog .di-qa-message {
+        margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;
+      }
+      #page-inspector-dialog .di-qa-message.user { align-items: flex-end; }
+      #page-inspector-dialog .di-qa-message.assistant { align-items: flex-start; }
+      #page-inspector-dialog .di-qa-bubble {
+        max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 12px; line-height: 1.6;
+        word-break: break-word;
+      }
+      #page-inspector-dialog .di-qa-message.user .di-qa-bubble {
+        background: rgba(255,176,0,0.15); border: 1px solid rgba(255,176,0,0.3); color: #ffb000;
+        border-bottom-right-radius: 4px;
+      }
+      #page-inspector-dialog .di-qa-message.assistant .di-qa-bubble {
+        background: #252525; border: 1px solid #333; color: #e8e8e8;
+        border-bottom-left-radius: 4px;
+      }
+      #page-inspector-dialog .di-qa-bubble pre {
+        white-space: pre-wrap; word-break: break-word; font-family: 'JetBrains Mono', monospace;
+      }
+      #page-inspector-dialog .di-qa-time { font-size: 9px; color: #555; margin-top: 2px; }
+      #page-inspector-dialog .di-qa-input-row {
+        display: flex; gap: 8px; padding: 10px 14px; background: #252525; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+      }
+      #page-inspector-dialog .di-qa-input {
+        flex: 1; padding: 10px 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 20px;
+        color: #e8e8e8; font-size: 12px; font-family: 'JetBrains Mono', monospace; resize: none; max-height: 100px;
+      }
+      #page-inspector-dialog .di-qa-input:focus { outline: none; border-color: #ffb000; }
+      #page-inspector-dialog .di-qa-input::placeholder { color: #555; }
+      #page-inspector-dialog .di-qa-send-btn {
+        width: 36px; height: 36px; background: #ffb000; border: none; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+        transition: all 0.15s ease;
+      }
+      #page-inspector-dialog .di-qa-send-btn:hover { background: #ffc233; transform: scale(1.05); }
+      #page-inspector-dialog .di-qa-send-btn:disabled { background: #333; cursor: not-allowed; transform: none; }
+      #page-inspector-dialog .di-qa-send-btn svg { color: #000; }
+      #page-inspector-dialog .di-qa-typing {
+        display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #888; font-size: 12px;
+      }
+      #page-inspector-dialog .di-qa-typing-dot {
+        width: 6px; height: 6px; background: #ffb000; border-radius: 50%; animation: pulse 1s ease-in-out infinite;
+      }
 
       #page-inspector-dialog .di-loading {
         position: absolute; inset: 0; display: none; flex-direction: column;
@@ -435,6 +504,7 @@ function getDialogHTML() {
       <div class="di-tabs">
         <button class="di-tab active" data-tab="original">原文</button>
         <button class="di-tab" data-tab="summary">总结</button>
+        <button class="di-tab" data-tab="qa">问答</button>
       </div>
       <div class="di-tab-content active" id="diOriginalContent">
         <div class="di-content-body" id="diOriginalBody">
@@ -472,6 +542,25 @@ function getDialogHTML() {
       </div>
     </div>
 
+    <div class="di-qa-container" id="diQAContainer" style="display: none;">
+      <div class="di-qa-messages" id="diQAMessages">
+        <div class="di-qa-empty" id="diQAEmpty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>针对网页内容进行问答</span>
+        </div>
+      </div>
+      <div class="di-qa-input-row">
+        <textarea class="di-qa-input" id="diQAInput" rows="1" placeholder="输入问题，按 Enter 发送..."></textarea>
+        <button class="di-qa-send-btn" id="diQASendBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <div class="di-loading" id="diLoading">
       <div class="di-spinner"></div>
       <span id="diLoadingText">处理中...</span>
@@ -483,6 +572,7 @@ function initDialogEvents() {
   let pageData = null;
   let summaryContent = '';
   let originalContent = '';
+  let qaMessages = [];
 
   document.getElementById('diCloseBtn').addEventListener('click', closeDialog);
 
@@ -491,8 +581,15 @@ function initDialogEvents() {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.di-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.di-tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.di-result-area').forEach(c => c.style.display = 'none');
+      document.getElementById('diQAContainer').style.display = 'none';
       tab.classList.add('active');
-      document.getElementById('di' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1) + 'Content').classList.add('active');
+      if (tab.dataset.tab === 'qa') {
+        document.getElementById('diQAContainer').style.display = 'flex';
+      } else {
+        document.getElementById('di' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1) + 'Content').classList.add('active');
+        document.querySelector('.di-result-area').style.display = '';
+      }
     });
   });
 
@@ -614,6 +711,149 @@ function initDialogEvents() {
     const markdown = generateMarkdownExport(pageData, summaryContent);
     downloadMarkdown(pageData, markdown);
   });
+
+  // QA Input handling
+  const qaInput = document.getElementById('diQAInput');
+  const qaSendBtn = document.getElementById('diQASendBtn');
+  const qaMessagesEl = document.getElementById('diQAMessages');
+  const qaEmptyEl = document.getElementById('diQAEmpty');
+
+  function updateQATabBadge() {
+    const qaTab = document.querySelector('[data-tab="qa"]');
+    if (qaMessages.length > 0) {
+      qaTab.classList.add('has-qa');
+    } else {
+      qaTab.classList.remove('has-qa');
+    }
+  }
+
+  function scrollQAMessages() {
+    qaMessagesEl.scrollTop = qaMessagesEl.scrollHeight;
+  }
+
+  function addQAMessage(role, content) {
+    if (qaEmptyEl) qaEmptyEl.style.display = 'none';
+
+    const msg = { role, content, time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) };
+    qaMessages.push(msg);
+
+    const msgEl = document.createElement('div');
+    msgEl.className = `di-qa-message ${role}`;
+    msgEl.innerHTML = `
+      <div class="di-qa-bubble"><pre>${escapeHtml(content)}</pre></div>
+      <div class="di-qa-time">${msg.time}</div>
+    `;
+    qaMessagesEl.appendChild(msgEl);
+    scrollQAMessages();
+    updateQATabBadge();
+  }
+
+  function handleQASubmit() {
+    const question = qaInput.value.trim();
+    if (!question || !originalContent) return;
+
+    addQAMessage('user', question);
+    qaInput.value = '';
+    qaSendBtn.disabled = true;
+
+    // 添加 typing 指示器
+    const typingEl = document.createElement('div');
+    typingEl.className = 'di-qa-message assistant';
+    typingEl.id = 'diQATyping';
+    typingEl.innerHTML = `
+      <div class="di-qa-bubble">
+        <div class="di-qa-typing">
+          <div class="di-qa-typing-dot"></div>
+          <div class="di-qa-typing-dot" style="animation-delay: 0.2s"></div>
+          <div class="di-qa-typing-dot" style="animation-delay: 0.4s"></div>
+          <span>AI 思考中...</span>
+        </div>
+      </div>
+    `;
+    qaMessagesEl.appendChild(typingEl);
+    scrollQAMessages();
+
+    setStatus('AI 思考中...', 'loading');
+
+    qaConversation(question).then(answer => {
+      typingEl.remove();
+      addQAMessage('assistant', answer);
+      setStatus('就绪', 'ready');
+    }).catch(err => {
+      typingEl.remove();
+      addQAMessage('assistant', `错误: ${err.message}`);
+      setStatus('回答失败', 'error');
+    }).finally(() => {
+      qaSendBtn.disabled = false;
+      qaInput.focus();
+    });
+  }
+
+  qaInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleQASubmit();
+    }
+  });
+
+  qaSendBtn.addEventListener('click', handleQASubmit);
+
+  async function qaConversation(question) {
+    const settings = await new Promise(r => chrome.storage.local.get(['apiUrl', 'apiKey', 'model', 'thinking', 'prompt'], r));
+
+    if (!settings.apiUrl || !settings.apiKey || !settings.model) {
+      throw new Error('请先配置 API 参数');
+    }
+
+    const thinkingConfig = settings.thinking ? { type: "enabled" } : { type: "disabled" };
+
+    // Build conversation messages with context
+    const conversationMessages = [];
+    for (const msg of qaMessages.filter(m => m.role === 'user')) {
+      conversationMessages.push({ role: 'user', content: msg.content });
+      const assistantMsg = qaMessages[qaMessages.indexOf(msg) + 1];
+      if (assistantMsg && assistantMsg.role === 'assistant') {
+        conversationMessages.push({ role: 'assistant', content: assistantMsg.content });
+      }
+    }
+
+    const systemPrompt = `你是一个网页内容分析助手。用户会询问关于当前网页内容的问题。
+请根据网页内容（${originalContent.slice(0, 6000)}）回答用户的问题。
+要求：
+1. 只基于网页内容回答，不要编造信息
+2. 回答简洁准确，如果网页内容中没有相关信息，说明不知道
+3. 可以使用 Markdown 格式化回答
+4. 不要使用代码块标记，直接输出内容`;
+
+    const response = await fetch(settings.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${settings.apiKey}`
+      },
+      body: JSON.stringify({
+        model: settings.model,
+        thinking: thinkingConfig,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...conversationMessages,
+          { role: 'user', content: question }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error?.message || `API 请求失败: ${response.status}`);
+    }
+
+    const data = await response.json();
+    let answer = data.choices[0]?.message?.content || '未能生成回答';
+    answer = answer.replace(/<think>[\s\S]*?<\/think>\s*/gi, '').trim();
+    return answer;
+  }
 
   // Helpers
   function setStatus(text, state = 'ready') {
