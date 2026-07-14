@@ -10,10 +10,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // ============================================
+// Utility Functions
+// ============================================
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================
 // Floating Button & Dialog
 // ============================================
 
 let dialogInstance = null;
+let savedSelection = '';
+let selectionHint = null;
+let pageData = null;
+let originalContent = '';
 
 function createFloatingButton() {
   if (document.getElementById('page-inspector-float')) return;
@@ -102,6 +116,21 @@ function createFloatingButton() {
   });
 
   document.body.appendChild(button);
+
+  // 监听划词选择，显示提示
+  document.addEventListener('mouseup', (e) => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim();
+    if (selectedText && selectedText.length > 10) {
+      button.style.transform = 'scale(1.15)';
+      button.style.boxShadow = '0 6px 28px rgba(0,0,0,0.5), 0 0 35px rgba(255,176,0,0.4)';
+      savedSelection = selectedText;
+    } else {
+      button.style.transform = 'scale(1)';
+      button.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(255,176,0,0.15)';
+    }
+  });
+
   } catch (err) { console.error('PageBrief error:', err); }
 }
 
@@ -135,8 +164,27 @@ function openDialog(floatingBtn) {
   dialogInstance = dialog;
   initDialogEvents();
 
-  // 自动提取正文
-  setTimeout(() => document.getElementById('diExtractBtn')?.click(), 100);
+  // 有划词直接显示，无划词点提取
+  setTimeout(() => {
+    if (savedSelection && savedSelection.length > 10) {
+      const originalBody = document.getElementById('diOriginalBody');
+      originalContent = savedSelection;
+      pageData = {
+        title: document.title || '',
+        url: window.location.href,
+        content: savedSelection,
+        author: [],
+        published: ''
+      };
+      originalBody.innerHTML = `<pre>${escapeHtml(savedSelection.slice(0, 5000))}${savedSelection.length > 5000 ? '\n\n... (内容已截断)' : ''}</pre>`;
+      document.querySelector('[data-tab="original"]').classList.add('has-content');
+      document.getElementById('diOriginalActionBar').style.display = 'flex';
+      document.getElementById('diSummarizeBtn').disabled = false;
+      setStatus('已提取划词内容', 'ready');
+    } else {
+      document.getElementById('diExtractBtn')?.click();
+    }
+  }, 100);
 
   // 监听滚动和窗口变化，让弹窗跟随悬浮球
   const floatBtn = document.getElementById('page-inspector-float');
@@ -536,9 +584,7 @@ function getDialogHTML() {
 }
 
 function initDialogEvents() {
-  let pageData = null;
   let summaryContent = '';
-  let originalContent = '';
   let qaMessages = [];
 
   document.getElementById('diCloseBtn').addEventListener('click', closeDialog);
@@ -617,6 +663,7 @@ function initDialogEvents() {
     setStatus('正在提取...', 'loading');
 
     try {
+      // 提取整个页面正文
       pageData = extractPageContent();
       originalContent = pageData.content;
 
@@ -890,12 +937,6 @@ function initDialogEvents() {
         spinnerInterval = null;
       }
     }
-  }
-
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
   }
 
   async function summarizeContent(content) {
