@@ -27,7 +27,7 @@ let dialogInstance = null;
 let savedSelection = '';
 let selectionHint = null;
 let pageData = null;
-let originalContent = '';
+let contextContent = '';
 
 function createFloatingButton() {
   if (document.getElementById('page-inspector-float')) return;
@@ -167,8 +167,8 @@ function openDialog(floatingBtn) {
   // 有划词直接显示，无划词点提取
   setTimeout(() => {
     if (savedSelection && savedSelection.length > 10) {
-      const originalBody = document.getElementById('diOriginalBody');
-      originalContent = savedSelection;
+      const originalBody = document.getElementById('diContextBody');
+      contextContent = savedSelection;
       pageData = {
         title: document.title || '',
         url: window.location.href,
@@ -177,10 +177,10 @@ function openDialog(floatingBtn) {
         published: ''
       };
       originalBody.innerHTML = `<pre>${escapeHtml(savedSelection.slice(0, 5000))}${savedSelection.length > 5000 ? '\n\n... (内容已截断)' : ''}</pre>`;
-      document.querySelector('[data-tab="original"]').classList.add('has-content');
-      document.getElementById('diOriginalActionBar').style.display = 'flex';
+      document.querySelector('[data-tab="context"]').classList.add('has-content');
+      document.getElementById('diContextActionBar').style.display = 'flex';
       document.getElementById('diSummarizeBtn').disabled = false;
-      setStatus('已提取划词内容', 'ready');
+      setStatus('已提取上下文', 'ready');
     } else {
       document.getElementById('diExtractBtn')?.click();
     }
@@ -517,16 +517,16 @@ function getDialogHTML() {
 
     <div class="di-result-area">
       <div class="di-tabs">
-        <button class="di-tab active" data-tab="original">原文</button>
+        <button class="di-tab active" data-tab="context">上下文</button>
         <button class="di-tab" data-tab="summary">总结</button>
         <button class="di-tab" data-tab="qa">问答</button>
       </div>
-      <div class="di-tab-content active" id="diOriginalContent">
-        <div class="di-content-body" id="diOriginalBody">
-          <span class="placeholder">点击「提取正文」开始...</span>
+      <div class="di-tab-content active" id="diContextContent">
+        <div class="di-content-body" id="diContextBody">
+          <span class="placeholder">点击「提取」获取上下文...</span>
         </div>
-        <div class="di-action-bar" id="diOriginalActionBar" style="display: none;">
-          <button class="di-copy-btn" id="diOriginalCopyBtn">
+        <div class="di-action-bar" id="diContextActionBar" style="display: none;">
+          <button class="di-copy-btn" id="diContextCopyBtn">
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
               <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
               <path d="M2 10V3a1 1 0 011-1h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
@@ -646,7 +646,7 @@ function initDialogEvents() {
   // Extract button
   document.getElementById('diExtractBtn').addEventListener('click', async () => {
     const extractBtn = document.getElementById('diExtractBtn');
-    const originalBody = document.getElementById('diOriginalBody');
+    const originalBody = document.getElementById('diContextBody');
 
     // Show inline loading
     originalBody.innerHTML = `
@@ -665,11 +665,11 @@ function initDialogEvents() {
     try {
       // 提取整个页面正文
       pageData = extractPageContent();
-      originalContent = pageData.content;
+      contextContent = pageData.content;
 
-      originalBody.innerHTML = `<pre>${escapeHtml(originalContent.slice(0, 5000))}${originalContent.length > 5000 ? '\n\n... (内容已截断)' : ''}</pre>`;
-      document.querySelector('[data-tab="original"]').classList.add('has-content');
-      document.getElementById('diOriginalActionBar').style.display = 'flex';
+      originalBody.innerHTML = `<pre>${escapeHtml(contextContent.slice(0, 5000))}${contextContent.length > 5000 ? '\n\n... (内容已截断)' : ''}</pre>`;
+      document.querySelector('[data-tab="context"]').classList.add('has-content');
+      document.getElementById('diContextActionBar').style.display = 'flex';
       document.getElementById('diSummarizeBtn').disabled = false;
       setStatus('提取完成', 'ready');
     } catch (error) {
@@ -682,7 +682,7 @@ function initDialogEvents() {
 
   // Summarize button
   document.getElementById('diSummarizeBtn').addEventListener('click', async () => {
-    if (!originalContent) return;
+    if (!contextContent) return;
 
     const summaryBody = document.getElementById('diSummaryBody');
     const summarizeBtn = document.getElementById('diSummarizeBtn');
@@ -702,7 +702,7 @@ function initDialogEvents() {
     setStatus('正在总结...', 'loading');
 
     try {
-      summaryContent = await summarizeContent(originalContent);
+      summaryContent = await summarizeContent(contextContent);
       summaryContent = summaryContent.replace(/<think>[\s\S]*?<\/think>\s*/gi, '').trim();
 
       summaryBody.innerHTML = `<pre>${escapeHtml(summaryContent)}</pre>`;
@@ -734,10 +734,10 @@ function initDialogEvents() {
   });
 
   // Copy button (for original tab)
-  document.getElementById('diOriginalCopyBtn').addEventListener('click', () => {
-    if (originalContent) {
-      navigator.clipboard.writeText(originalContent).then(() => {
-        const btn = document.getElementById('diOriginalCopyBtn');
+  document.getElementById('diContextCopyBtn').addEventListener('click', () => {
+    if (contextContent) {
+      navigator.clipboard.writeText(contextContent).then(() => {
+        const btn = document.getElementById('diContextCopyBtn');
         btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> 已复制`;
         setTimeout(() => {
           btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M2 10V3a1 1 0 011-1h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 复制`;
@@ -791,7 +791,7 @@ function initDialogEvents() {
 
   function handleQASubmit() {
     const question = qaInput.value.trim();
-    if (!question || !originalContent) return;
+    if (!question || !contextContent) return;
 
     addQAMessage('user', question);
     qaInput.value = '';
@@ -859,7 +859,7 @@ function initDialogEvents() {
     }
 
     const systemPrompt = `你是一个网页内容分析助手。用户会询问关于当前网页内容的问题。
-请根据网页内容（${originalContent.slice(0, 6000)}）回答用户的问题。
+请根据上下文内容（${contextContent.slice(0, 6000)}）回答用户的问题。
 要求：
 1. 只基于网页内容回答，不要编造信息
 2. 回答简洁准确，如果网页内容中没有相关信息，说明不知道
@@ -990,7 +990,7 @@ function initDialogEvents() {
   function getDefaultPrompt() {
     return `你是一个网页内容分析助手。请将用户提供的网页内容总结成规范的 Markdown 格式。
 总结要求：
-1. 保留原文的核心观点和重要细节
+1. 保留上下文的核心观点和重要细节
 2. 使用 Markdown 格式组织内容（标题、列表、引用等）
 3. 在内容开头添加 YAML frontmatter 元信息
 4. 不要使用任何代码块标记（\`\`\`yaml 或 \`\`\`markdown），直接输出 YAML 和 Markdown 正文`;
