@@ -19,6 +19,16 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function setStatus(text, state = 'ready') {
+  const dot = document.getElementById('diStatusDot');
+  const textEl = document.getElementById('diStatusText');
+  if (!dot || !textEl) return;
+  textEl.textContent = text;
+  dot.className = 'di-status-dot';
+  if (state === 'loading') dot.classList.add('loading');
+  if (state === 'error') dot.classList.add('error');
+}
+
 // ============================================
 // Floating Button & Dialog
 // ============================================
@@ -897,15 +907,6 @@ function initDialogEvents() {
   }
 
   // Helpers
-  function setStatus(text, state = 'ready') {
-    const dot = document.getElementById('diStatusDot');
-    const textEl = document.getElementById('diStatusText');
-    textEl.textContent = text;
-    dot.className = 'di-status-dot';
-    if (state === 'loading') dot.classList.add('loading');
-    if (state === 'error') dot.classList.add('error');
-  }
-
   const spinnerVerbs = [
     '正在思考', '正在分析', '正在理解', '正在提取', '正在整理',
     '正在总结', '正在归纳', '正在组织', '正在优化', '正在生成',
